@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse('user:me')
 
 
 def create_user(**params):
@@ -78,3 +79,9 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', response.data)
+
+    def test_retrieve_user_unauthenticated(self):
+        """Test retrieving user without authentication is failed"""
+        response = self.client.get(ME_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
