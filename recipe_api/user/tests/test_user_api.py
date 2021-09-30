@@ -101,3 +101,13 @@ class PrivateUserApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, {'email': self.user.email, 'name': self.user.name})
+
+    def test_update_user(self):
+        """Test updating user with authentication is successful"""
+        payload = {'password': 'newPassword', 'name': 'New Name'}
+        response = self.client.patch(ME_URL, payload)
+
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.user.name, payload['name'])
+        self.assertTrue(self.user.check_password(payload['password']))
