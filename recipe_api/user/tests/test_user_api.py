@@ -85,3 +85,19 @@ class PublicUserApiTests(TestCase):
         response = self.client.get(ME_URL)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTest(TestCase):
+    """Test private user APIs"""
+
+    def setUp(self):
+        self.user = create_user(email='test@test.com', password='test123', name='Test Name')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_user(self):
+        """Test retrieving user itself with authentication"""
+        response = self.client.get(ME_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'email': self.user.email, 'name': self.user.name})
