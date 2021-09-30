@@ -111,3 +111,9 @@ class PrivateUserApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
+
+    def test_post_method_me(self):
+        """Test POST method is not allowed on the ME_URL"""
+        response = self.client.post(ME_URL, {})
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
