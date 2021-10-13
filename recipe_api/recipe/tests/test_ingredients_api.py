@@ -5,6 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from ..serializers import IngredientSerializer
+
 INGREDIENTS_URL = reverse('recipe:ingredient-list')
 
 
@@ -40,3 +42,14 @@ class PrivateIngredientsApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
+
+    def test_ingredient_limited_to_user(self):
+        """Test listed ingredients limited to the authenticated user"""
+        user2 = get_user_model().objects.create_user(email='another@test.com', password='TestAnother')
+        Ingredient.objects.create(user=user2, name='Beef')
+        ingredient = Ingredient.objects.create(user=self.user, name='Chicken')
+        response = self.client.get(INGREDIENTS_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['name'], ingredient.name)
