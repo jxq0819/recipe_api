@@ -40,3 +40,14 @@ class PrivateTagsApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
+
+    def test_tags_limited_to_user(self):
+        """Test listed tags limited to the authenticated user"""
+        user2 = get_user_model().objects.create_user(email='another@test.com', password='AnotherTest')
+        Tag.objects.create(user=user2, name='Seafood')
+        tag = Tag.objects.create(user=self.user, name='Organic')
+        response = self.client.get(TAGS_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['name'], tag.name)
