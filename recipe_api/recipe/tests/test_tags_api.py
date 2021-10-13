@@ -53,3 +53,12 @@ class PrivateTagsApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['name'], tag.name)
+
+    def test_create_tag(self):
+        """Test creating a new tag"""
+        payload = {'name': 'Test tag'}
+        response = self.client.post(TAGS_URL, payload)
+        tag_exists = Tag.objects.filter(user=self.user, name=payload['name'])
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(tag_exists)
