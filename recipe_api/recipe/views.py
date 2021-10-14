@@ -6,33 +6,27 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import TagSerializer, IngredientSerializer
 
 
-class TagViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
-    """API view set for managing tags"""
+class BaseRecipeAttributeViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
+    """Base API view set for recipe attributes"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        """Return recipe attributes for the authenticated user"""
+        return self.queryset.filter(user=self.request.user).order_by('-name')
+
+    def perform_create(self, serializer):
+        """Create a new recipe attribute"""
+        serializer.save(user=self.request.user)
+
+
+class TagViewSet(BaseRecipeAttributeViewSet):
+    """API view set for managing tags"""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
-    def get_queryset(self):
-        """Return tags for the current authenticated user"""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
 
-    def perform_create(self, serializer):
-        """Creat a new tag for the authenticated user"""
-        serializer.save(user=self.request.user)
-
-
-class IngredientViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
+class IngredientViewSet(BaseRecipeAttributeViewSet):
     """API view set for managing ingredients"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-
-    def get_queryset(self):
-        """Return ingredients for the authenticated user"""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-
-    def perform_create(self, serializer):
-        """Create a new ingredient for the authenticated user"""
-        serializer.save(user=self.request.user)
