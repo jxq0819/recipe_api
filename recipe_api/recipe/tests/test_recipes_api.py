@@ -154,3 +154,19 @@ class PrivateRecipesTest(TestCase):
         tags = recipe.tags.all()
         self.assertEqual(len(tags), 1)
         self.assertIn(new_tag, tags)
+
+    def test_full_update_recipe(self):
+        """Test updating a recipe fully"""
+        recipe = create_sample_recipe(user=self.user)
+        recipe.tags.add(create_sample_tag(user=self.user))
+        payload = {'title': 'Spaghetti bolognese', 'time_minutes': 20, 'price': 12.5}
+        url = get_recipe_detail_url(recipe.id)
+        response = self.client.put(url, payload)
+        recipe.refresh_from_db()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(recipe.title, payload['title'])
+        self.assertEqual(recipe.time_minutes, payload['time_minutes'])
+        self.assertEqual(recipe.price, payload['price'])
+        tags = recipe.tags.all()
+        self.assertEqual(len(tags), 0)
